@@ -63,7 +63,7 @@ twaddle.compile = function(id, callback) {
 
 /**
 * Generate the specified amount of text
-* @param {string} id The id of the library to use
+* @param {string|array} id The id of the library to use or an array to combine multiple
 * @param {Object|number} options Either an object of settings, or if this is a number the default value for options.words
 * @param {number} [options.words=20] Generate at minimum this number of words
 * @param {number} [options.sentences] Generate at minimum this number of sentences
@@ -75,9 +75,25 @@ twaddle.compile = function(id, callback) {
 * @param {string} The generated text
 */
 twaddle.generate = function(id, options) {
-	var lib = twaddle.libraries[id];
-	if (!lib) throw new Error('ID not found: ' + id);
-	if (!lib.chain) twaddle.compile(id);
+	var lib; 
+
+	if (_.isArray(id)) { // If passed an array make a fake library and combine all the available data
+		var combineId = 'COMBINE-' + id.join('&');
+		lib = twaddle.libraries[combineId] = {
+			path: _(id)
+				.map(function(i) {
+					if (!twaddle.libraries[i]) throw new Error('ID not found when combining: ' + i);
+					return twaddle.libraries[i].path;
+				})
+				.flatten()
+				.value(),
+		};
+		twaddle.compile(combineId);
+	} else {
+		lib = twaddle.libraries[id];
+		if (!lib) throw new Error('ID not found: ' + id);
+		if (!lib.chain) twaddle.compile(id);
+	}
 
 	// Deal with options {{{
 	if (!options) options = {words: 20};
