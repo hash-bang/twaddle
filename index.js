@@ -1,5 +1,6 @@
 var _ = require('lodash');
 var fs = require('fs');
+var fspath = require('path');
 var markoff = require('markoff');
 
 var twaddle = {};
@@ -20,6 +21,7 @@ twaddle.libraries = {};
 * Register a new library
 * @param {string} id The unique ID to register
 * @param {string} path The path to the source material
+* @param {Object} This chainable object
 */
 twaddle.register = function(id, path) {
 	if (twaddle.libraries[id]) throw new Error('Attempting to register over existing ID: ' + id);
@@ -32,28 +34,29 @@ twaddle.register = function(id, path) {
 
 /**
 * Compile a loaded library
+* @param {Object} This chainable object
 */
 twaddle.compile = function(id, callback) {
 	var lib = twaddle.libraries[id];
 	if (!lib) throw new Error('ID not found: ' + id);
 	if (lib.chain) return callback(null, lib); // Already compiled
 
-	var contents = fs.readFileSync(lib.path, 'utf-8');
-
 	lib.chain = new markoff();
 
-	contents
-		.replace(/[^a-z0-9-\.\n']+/gi, ' ')
-		.replace(/^[\s\t]+/g, '')
-		.replace(/[\s\t]+$/g, '')
-		.split("\n")
-		.forEach(function(line) {
-			lib.chain.addTokens(
-				line
-					.split(/\s+/g)
-					.filter(function(w) { return !!w })
-			);
-		});
+	_.castArray(lib.path).forEach(function(file) {
+		fs.readFileSync(file, 'utf-8')
+			.replace(/[^a-z0-9-\.\n']+/gi, ' ')
+			.replace(/^[\s\t]+/g, '')
+			.replace(/[\s\t]+$/g, '')
+			.split("\n")
+			.forEach(function(line) {
+				lib.chain.addTokens(
+					line
+						.split(/\s+/g)
+						.filter(function(w) { return !!w })
+				);
+			});
+	});
 
 	return twaddle;
 };
@@ -69,6 +72,7 @@ twaddle.compile = function(id, callback) {
 * @param {number} [options.maxSentencesPerParagraph=5] The largest number of sentences that can consitute a paragraph
 * @param {string} [options.paragraphJoiner='\n\n'] The joining characters used between pargraphs
 * @param {string} [options.paragraphStructure] An array of the sentence length of each paragraph. If omitted this is calculated and randomized from the above settings
+* @param {string} The generated text
 */
 twaddle.generate = function(id, options) {
 	var lib = twaddle.libraries[id];
@@ -127,4 +131,23 @@ twaddle.generate = function(id, options) {
 };
 
 
+/**
+* Load all libraries from the ./data folder
+* @param {Object} This chainable object
+*/
+twaddle.autoLoad = function(callback) {
+	fs.readdir(fspath.join(__dirname, 'data'), function(err, res) {
+		res.forEach(function(dir) {
+			fs.readdir(fspath.join(__dirname, 'data', dir), function(err, files) {
+				twaddle.register(dir, files.map(function(f) { return fspath.join(__dirname, 'data', dir, f) }));
+			});
+		});
+	});
+
+	return this;
+};
+
+
 module.exports = twaddle;
+
+twaddle.autoLoad(); // Kick off the autoloader
