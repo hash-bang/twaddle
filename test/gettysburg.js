@@ -19,7 +19,7 @@ describe('Gettysburg', function() {
 		mlog.log('Generated:', out);
 		expect(out).to.be.a.string;
 		expect(out).to.have.length.above(5);
-		expect(out.split(/\s+/)).to.have.length(5);
+		expect(out.split(/\s+/)).to.have.length.above(5);
 	});
 
 	it('should be able to generate 20 words', function() {
@@ -27,6 +27,22 @@ describe('Gettysburg', function() {
 		mlog.log('Generated:', out);
 		expect(out).to.be.a.string;
 		expect(out).to.have.length.above(20);
-		expect(out.split(/\s+/)).to.have.length(20);
+		expect(out.split(/\s+/)).to.have.length.above(20);
+	});
+
+	it('should be able to generate 5 sentences', function() {
+		var out = twaddle.generate('lincoln', {sentences: 5});
+		mlog.log('Generated:', out);
+		expect(out).to.be.a.string;
+		expect(out).to.have.length.above(20);
+		expect(out.split(/\./)).to.have.length.above(4);
+	});
+
+	it.skip('should be able to generate 5 paragaphs', function() {
+		var out = twaddle.generate('lincoln', {sentences: 5, paragraphs: 5});
+		mlog.log('Generated:', out);
+		expect(out).to.be.a.string;
+		expect(out).to.have.length.above(20);
+		expect(out.split(/\n\n/)).to.have.length.above(4);
 	});
 });

@@ -42,7 +42,7 @@ twaddle.compile = function(id, callback) {
 	lib.chain = new markoff();
 
 	contents
-		.replace(/[^a-z0-9-\n']+/gi, ' ')
+		.replace(/[^a-z0-9-\.\n']+/gi, ' ')
 		.replace(/^[\s\t]+/g, '')
 		.replace(/[\s\t]+$/g, '')
 		.split("\n")
@@ -57,23 +57,26 @@ twaddle.compile = function(id, callback) {
 	return twaddle;
 };
 
-
-twaddle.batchSize = 10;
-
-
-twaddle.generate = function(id, size) {
+twaddle.generate = function(id, options) {
 	var lib = twaddle.libraries[id];
 	if (!lib) throw new Error('ID not found: ' + id);
 	if (!lib.chain) twaddle.compile(id);
+	if (!options) options = {words: 20};
+	if (typeof options == 'number') options = {words: options};
 
 	var buffer = [];
 
 	while (true) {
-		lib.chain.chain(size).forEach(function(w) {
+		lib.chain.chain().forEach(function(w) {
 			buffer.push(w);
 		});
 
-		if (buffer.length > size) return buffer.slice(0, size).join(' ');
+		if (
+			(!options.words || buffer.length >= options.words) &&
+			(!options.sentences || buffer.filter(function(w) { return /\.$/.test(w) }).length >= options.sentences)
+		) {
+			return buffer.join(' ')
+		}
 	}
 };
 
