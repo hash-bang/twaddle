@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var fs = require('fs');
 var markoff = require('markoff');
 
@@ -57,12 +58,41 @@ twaddle.compile = function(id, callback) {
 	return twaddle;
 };
 
+/**
+* Generate the specified amount of text
+* @param {string} id The id of the library to use
+* @param {Object|number} options Either an object of settings, or if this is a number the default value for options.words
+* @param {number} [options.words=20] Generate at minimum this number of words
+* @param {number} [options.sentences] Generate at minimum this number of sentences
+* @param {number} [options.paragraphs] Generate at minimum this number of paragraphs (this can override `sentences` to produce its output)
+* @param {number} [options.minSentencesPerParagraph=1] The smallest number of sentences that can consitute a paragraph
+* @param {number} [options.maxSentencesPerParagraph=5] The largest number of sentences that can consitute a paragraph
+* @param {string} [options.paragraphJoiner='\n\n'] The joining characters used between pargraphs
+* @param {string} [options.paragraphStructure] An array of the sentence length of each paragraph. If omitted this is calculated and randomized from the above settings
+*/
 twaddle.generate = function(id, options) {
 	var lib = twaddle.libraries[id];
 	if (!lib) throw new Error('ID not found: ' + id);
 	if (!lib.chain) twaddle.compile(id);
+
+	// Deal with options {{{
 	if (!options) options = {words: 20};
 	if (typeof options == 'number') options = {words: options};
+
+	var settings = _.defaults({
+		minSentencesPerParagraph: 1,
+		maxSentencesPerParagraph: 5,
+		paragraphStructure: [],
+		paragraphJoiner: '\n\n',
+	}, options);
+	
+	if (settings.paragraphs) { // Construct settings.paragraphStructure
+		settings.paragraphStructure = _.times(settings.paragraphs, function() {
+			return _.random(settings.minSentencesPerParagraph, settings.maxSentencesPerParagraph);
+		});
+		settings.sentences = Math.min(settings.sentences || 1, _.sum(settings.paragraphStructure)); // Calculate the minimum number of sentences needed to satisfy paragraphs
+	}
+	// }}}
 
 	var buffer = [];
 
@@ -72,10 +102,26 @@ twaddle.generate = function(id, options) {
 		});
 
 		if (
-			(!options.words || buffer.length >= options.words) &&
-			(!options.sentences || buffer.filter(function(w) { return /\.$/.test(w) }).length >= options.sentences)
+			(!settings.words || buffer.length >= settings.words) &&
+			(!settings.sentences || buffer.filter(function(w) { return /\.$/.test(w) }).length >= settings.sentences)
 		) {
-			return buffer.join(' ')
+			if (settings.paragraphs) { // Split sentences into paragraphs
+				var sentences = buffer
+					.join(' ') // Join everything together
+					.split('.'); // Split into sentences
+
+				return settings.paragraphStructure
+					.map(function(no, i) {
+						return _.times(no, function() {
+							var sentence = sentences.shift();
+							return sentence ? sentence + '.' : '';
+						}).filter(function(w) { return !! w});
+					})
+					.filter(function(w) { return w != '' })
+					.join(settings.paragraphJoiner);
+			} else { // Return simple string
+				return buffer.join(' ')
+			}
 		}
 	}
 };

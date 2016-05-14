@@ -33,7 +33,12 @@ Generate the specified amount of text.
 
 The options parameter can be constructed of the following keys:
 
-| Key                 | Description                                  |
-|---------------------|----------------------------------------------|
-| `words`             | Generate at minimum this number of words     |
-| `sentences`         | Generate at minimum this number of sentences |
+| Key                        | Default     | Description                                                                                                             |
+|----------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------|
+| `words`                    | `20`        | Generate at minimum this number of words                                                                                |
+| `sentences`                | `null`      | Generate at minimum this number of sentences                                                                            |
+| `paragraphs`               | `null`      | Generate at minimum this number of paragraphs (this can override `sentences` to produce its output                      |
+| `minSentencesPerParagraph` | `1`         | The smallest number of sentences that can consitute a paragraph                                                         |
+| `maxSentencesPerParagraph` | `5`         | The largest number of sentences that can consitute a paragraph                                                          |
+| `paragraphJoiner`          | `"\n\n"`    | The joining characters used between pargraphs                                                                           |
+| `paragraphStructure`       | `[]`        | An array of the sentence length of each paragraph. If omitted this is calculated and randomized from the above settings |

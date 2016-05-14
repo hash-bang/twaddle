@@ -29,6 +29,7 @@
     "mocha-logger": "^1.0.3"
   },
   "dependencies": {
+    "lodash": "^4.12.0",
     "markoff": "^2.2.0"
   }
 }
