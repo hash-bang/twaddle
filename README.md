@@ -73,3 +73,11 @@ The options parameter can be constructed of the following keys:
 | `paragraphStructure`       | `[]`        | An array of the sentence length of each paragraph. If omitted this is calculated and randomized from the above settings |
 | `fixTrim`                  | `true`      | Trim all paragraph content before output                                                                                |
 | `fixCapitalFirst`          | `true`      | Check that all sentences have a capital letter first                                                                    |
+
+
+Credits
+=======
+* [American Rhetoric](http://www.americanrhetoric.com)
+* [History Place](http://www.historyplace.com/speeches/previous.htm)
+* [Jewish Virtual Library](http://www.jewishvirtuallibrary.org/jsource/Holocaust/hitlertoc.html)
+* [Presidential Rhetoric](http://www.presidentialrhetoric.com/historicspeeches/index.html)
