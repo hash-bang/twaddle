@@ -71,3 +71,5 @@ The options parameter can be constructed of the following keys:
 | `maxSentencesPerParagraph` | `5`         | The largest number of sentences that can constitute a paragraph                                                         |
 | `paragraphJoiner`          | `"\n\n"`    | The joining characters used between paragraphs                                                                          |
 | `paragraphStructure`       | `[]`        | An array of the sentence length of each paragraph. If omitted this is calculated and randomized from the above settings |
+| `fixTrim`                  | `true`      | Trim all paragraph content before output                                                                                |
+| `fixCapitalFirst`          | `true`      | Check that all sentences have a capital letter first                                                                    |

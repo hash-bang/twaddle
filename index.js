@@ -72,6 +72,8 @@ twaddle.compile = function(id, callback) {
 * @param {number} [options.maxSentencesPerParagraph=5] The largest number of sentences that can consitute a paragraph
 * @param {string} [options.paragraphJoiner='\n\n'] The joining characters used between pargraphs
 * @param {string} [options.paragraphStructure] An array of the sentence length of each paragraph. If omitted this is calculated and randomized from the above settings
+* @param {boolean} [options.fixTrim=true] FIX: Trim all paragraph output
+* @param {boolean} [options.fixCapitalFirst=true] FIX: All sentences must begin with a capital letter
 * @param {string} The generated text
 */
 twaddle.generate = function(id, options) {
@@ -104,6 +106,8 @@ twaddle.generate = function(id, options) {
 		maxSentencesPerParagraph: 5,
 		paragraphStructure: [],
 		paragraphJoiner: '\n\n',
+		fixTrim: true,
+		fixCapitalFirst: true,
 	}, options);
 	
 	if (settings.paragraphs) { // Construct settings.paragraphStructure
@@ -128,14 +132,18 @@ twaddle.generate = function(id, options) {
 			if (settings.paragraphs) { // Split sentences into paragraphs
 				var sentences = buffer
 					.join(' ') // Join everything together
-					.split('.'); // Split into sentences
+					.split('.') // Split into sentences
+					.map(function(s) { return (settings.fixCapitalFirst) ? _.upperFirst(s) : s })
+					.map(function(s) { return (settings.fixTrim) ? _.trim(s) : s })
 
 				return settings.paragraphStructure
 					.map(function(no, i) {
 						return _.times(no, function() {
 							var sentence = sentences.shift();
 							return sentence ? sentence + '.' : '';
-						}).filter(function(w) { return !! w});
+						})
+						.filter(function(w) { return !! w})
+						.join(' ')
 					})
 					.filter(function(w) { return w != '' })
 					.join(settings.paragraphJoiner);
@@ -152,12 +160,9 @@ twaddle.generate = function(id, options) {
 * @param {Object} This chainable object
 */
 twaddle.autoLoad = function(callback) {
-	fs.readdir(fspath.join(__dirname, 'data'), function(err, res) {
-		res.forEach(function(dir) {
-			fs.readdir(fspath.join(__dirname, 'data', dir), function(err, files) {
-				twaddle.register(dir, files.map(function(f) { return fspath.join(__dirname, 'data', dir, f) }));
-			});
-		});
+	fs.readdirSync(fspath.join(__dirname, 'data')).forEach(function(dir) {
+		var files = fs.readdirSync(fspath.join(__dirname, 'data', dir));
+		twaddle.register(dir, files.map(function(f) { return fspath.join(__dirname, 'data', dir, f) }));
 	});
 
 	return this;
