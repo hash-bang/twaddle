@@ -24,7 +24,7 @@ You can also supply `twaddle.generate()` with an array of ID's which will merge 
 ```javascript
 var twaddle = require('twaddle');
 
-console.log( twaddle.generate(['politics-us-trump-donald', 'politics-de-hitler-adolph'], {paragraphs: 5}) );
+console.log( twaddle.generate(['politics-us-trump-j-donald', 'politics-de-hitler-adolph'], {paragraphs: 5}) );
 ```
 
 
