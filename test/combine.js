@@ -4,7 +4,7 @@ var twaddle = require('..');
 
 describe('Combine', function() {
 	it('should be able to combine IDs', function() {
-		var out = twaddle.generate(['politics-au-gillard-julia', 'politics-us-kennedy-f-john']);
+		var out = twaddle.generate(['politics-de-hitler-adolf', 'politics-us-trump-j-donald']);
 		mlog.log('Generated:', out);
 		expect(out).to.be.a.string;
 	});
